@@ -15,10 +15,12 @@ import kotlinx.coroutines.*
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     // TODO: Implement the ViewModel
     private val context = getApplication<Application>().applicationContext
-    private val _cities = MutableLiveData<List<DomainCity>>()
-    val cities: LiveData<List<DomainCity>>
+    private val _cities = MutableLiveData<List<DomainCity>?>()
+    val cities: LiveData<List<DomainCity>?>
         get() = _cities
     private var cityString: String = ""
+
+    //val cities2: List<DomainCity>
 
 
     private fun convert() {
@@ -26,7 +28,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val type = Types.newParameterizedType(List::class.java ,DomainCity::class.java)
         val adapter: JsonAdapter<List<DomainCity>> = moshi.adapter(type)
         _cities.value = adapter.fromJson(cityString)
-        Log.i("ktra", "${_cities.value?.get(100)?.name}")
     }
 
 
@@ -34,20 +35,19 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
     init {
         readTextFile()
-//        Log.i("ktra", city.toString())
-
     }
 
     private fun readTextFile(){
         coroutineScope.launch {
             readFileFromAssets()
+            convert()
         }}
 
     private suspend fun readFileFromAssets() {
         withContext(Dispatchers.IO) {
             cityString = context.assets.open("city.list.json").bufferedReader().use { it.readText() }
         }
-        convert()
+
     }
 
 
